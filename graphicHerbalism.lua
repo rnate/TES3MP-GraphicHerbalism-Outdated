@@ -1,4 +1,4 @@
---[[Graphic Herbalism Server Scripts 1.1 - Developed with tes3mp 0.7.0-alpha
+--[[Graphic Herbalism Server Scripts 1.11 - Developed with tes3mp 0.7.0-alpha
 This is necessary because graphic herbalism mods work using a global player variable that is not saved correctly
 
 Installation
@@ -310,17 +310,17 @@ local function InventoryManagement(plantRefId, pid)
 	local ingredient = GetIngredient(plantRefId)
 	
 	if ingredient.Count > 0 then
-		inventoryHelper.addItem(Players[pid].data.inventory, ingredient.RefId, ingredient.Count, nil, nil, nil)
-
+		inventoryHelper.addItem(Players[pid].data.inventory, ingredient.RefId, ingredient.Count, -1, -1, "")
+		
 		local item = {}
 		item.refId = ingredient.RefId
-		item.count = ingredient.Count
 		item.charge = -1
 		item.enchantmentCharge = -1
-		item.soul = -1
+		item.count = ingredient.Count
+		item.soul = ""
 		
 		Players[pid]:LoadItemChanges({item}, enumerations.inventory.ADD)
-
+		
 		local message = ""
 
 		if ingredient.Count > 1 then
@@ -361,7 +361,7 @@ function GraphicHerbalism.CanPickPlant(plantRefId)
 	local plants = {"egg_kwama00", "cavern_spore00", "contain_trama_shrub_", "flora_ash_yam_", "flora_bc_fern_", "flora_bc_mushroom_", "flora_bc_podplant_", "flora_bc_shelffungus_", "flora_bittergreen_", "flora_black_anther_", "flora_black_lichen_",
 	"flora_chokeweed_02", "flora_comberry_01", "flora_corkbulb", "flora_fire_fern_", "flora_gold_kanet_", "flora_green_lichen_", "flora_hackle", "flora_heather_01", "flora_kreshweed_", "flora_marshmerrow_", "flora_muckspunge_",
 	"flora_plant_01", "flora_plant_02", "flora_plant_03", "flora_plant_04", "flora_plant_05", "flora_plant_06", "flora_plant_07", "flora_plant_08", "flora_red_lichen_", "flora_rm_scathecraw_", "flora_roobrush_","flora_saltrice_",
-	"flora_sedge_01", "flora_sedge_02", "flora_stoneflower_", "flora_wickwheat_", "flora_willow_flower_", "tramaroot_", "tramaroot_01", "flora_bm_belladonna_", "flora_bm_holly_", "flora_bm_wolfsbane_01"}
+	"flora_sedge_01", "flora_sedge_02", "flora_stoneflower_", "flora_wickwheat_", "flora_willow_flower_", "tramaroot_", "flora_bm_belladonna_", "flora_bm_holly_", "flora_bm_wolfsbane_01"}
 	
 	local result = false
 	
