@@ -311,10 +311,16 @@ local function InventoryManagement(plantRefId, pid)
 	
 	if ingredient.Count > 0 then
 		inventoryHelper.addItem(Players[pid].data.inventory, ingredient.RefId, ingredient.Count, nil, nil, nil)
-		Players[pid]:Save()
-		Players[pid]:LoadInventory()
-		Players[pid]:LoadEquipment()
+
+		local item = {}
+		item.refId = ingredient.RefId
+		item.count = ingredient.Count
+		item.charge = -1
+		item.enchantmentCharge = -1
+		item.soul = -1
 		
+		Players[pid]:LoadItemChanges({item}, enumerations.inventory.ADD)
+
 		local message = ""
 
 		if ingredient.Count > 1 then
