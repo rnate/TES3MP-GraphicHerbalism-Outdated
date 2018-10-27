@@ -1,4 +1,4 @@
---[[Graphic Herbalism Server Scripts 1.0 - Developed with tes3mp 0.7.0-alpha
+--[[Graphic Herbalism Server Scripts 1.1 - Developed with tes3mp 0.7.0-alpha
 This is necessary because graphic herbalism mods work using a global player variable that is not saved correctly
 
 Installation
