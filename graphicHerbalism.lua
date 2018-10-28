@@ -1,4 +1,4 @@
---[[Graphic Herbalism Server Scripts 1.11 - Developed with tes3mp 0.7.0-alpha
+--[[Graphic Herbalism Server Scripts 1.12 - Developed with tes3mp 0.7.0-alpha
 This is necessary because graphic herbalism mods work using a global player variable that is not saved correctly
 
 Installation
@@ -394,21 +394,27 @@ function GraphicHerbalism.OnCellLoad(pid, cellDescription)
 					
 					--if this is the day it should respawn we need to check the hour
 					if WorldInstance.data.time.daysPassed - value2['daysPassed'] == growthDays and math.floor(WorldInstance.data.time.hour) - value2['hour'] >= 0 or WorldInstance.data.time.daysPassed - value2['daysPassed'] >= growthDays + 1 then
-						local splitIndex = uniqueIndex:split("-")
-						
-						logicHandler.RunConsoleCommandOnObject("Enable", cellDescription, value2['plantRefId'], splitIndex[1], splitIndex[2])
-						
-						objectData = {}
-						objectData.refId = value2['plantRefId']
-						objectData.state = true
-						
-						packetBuilder.AddObjectState(uniqueIndex, objectData)
-						LoadedCells[cellDescription].data.objectData[uniqueIndex].state = true
-						tes3mp.SendObjectState()
-						
-						pickData[cellDescription][uniqueIndex] = nil --delete reference
-						
-						deletedCount = deletedCount + 1
+						if LoadedCells[cellDescription].data.objectData[uniqueIndex] ~= nil then
+							tes3mp.LogMessage(enumerations.log.ERROR, "*************cellDescription" .. cellDescription)
+							local splitIndex = uniqueIndex:split("-")
+							
+							logicHandler.RunConsoleCommandOnObject("Enable", cellDescription, value2['plantRefId'], splitIndex[1], splitIndex[2])
+							
+							objectData = {}
+							objectData.refId = value2['plantRefId']
+							objectData.state = true
+							
+							packetBuilder.AddObjectState(uniqueIndex, objectData)
+							LoadedCells[cellDescription].data.objectData[uniqueIndex].state = true
+							tes3mp.SendObjectState()
+							
+							pickData[cellDescription][uniqueIndex] = nil --delete reference
+							
+							deletedCount = deletedCount + 1
+						else
+							pickData[cellDescription][uniqueIndex] = nil
+							deletedCount = deletedCount + 1
+						end
 					end
 				end
 
