@@ -395,7 +395,6 @@ function GraphicHerbalism.OnCellLoad(pid, cellDescription)
 					--if this is the day it should respawn we need to check the hour
 					if WorldInstance.data.time.daysPassed - value2['daysPassed'] == growthDays and math.floor(WorldInstance.data.time.hour) - value2['hour'] >= 0 or WorldInstance.data.time.daysPassed - value2['daysPassed'] >= growthDays + 1 then
 						if LoadedCells[cellDescription].data.objectData[uniqueIndex] ~= nil then
-							tes3mp.LogMessage(enumerations.log.ERROR, "*************cellDescription" .. cellDescription)
 							local splitIndex = uniqueIndex:split("-")
 							
 							logicHandler.RunConsoleCommandOnObject("Enable", cellDescription, value2['plantRefId'], splitIndex[1], splitIndex[2])
