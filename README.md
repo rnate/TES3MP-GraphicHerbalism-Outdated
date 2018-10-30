@@ -3,28 +3,32 @@ Due to them relying on global player variables, none of the popular 'Graphic Her
 
 # Installation
 Save this file in the mp-stuff\scripts\ directory.<br />
-These edits will be made in the same directory in the eventHandler.lua file.
+These edits will be made in the same directory in the serverCore.lua file.
 
-1) Add: `graphicHerbalism = require("graphicHerbalism")`<br />
-under: `commandHandler = require("commandHandler")` ~line 3
+1a) Add: `graphicHerbalism = require("graphicHerbalism")`<br />
+under: `menuHelper = require("menuHelper")` ~line 14
 
-2) Add: `graphicHerbalism.OnPlayerConnect()`<br />
-under: `tes3mp.StartTimer(Players[pid].loginTimerId)` ~line 49
+1b) Add: `graphicHerbalism.OnServerPostInit()`<br />
+under: `ResetAdminCounter()` ~line 285
 
-3) Add: `graphicHerbalism.OnCellLoad(pid, cellDescription)`<br />
-under: `logicHandler.LoadCellForPlayer(pid, cellDescription)` ~line 490
+1c) Add: `graphicHerbalism.OnCellLoad(pid, cellDescription)`<br />
+under: `eventHandler.OnCellLoad(pid, cellDescription)` ~line 460
 
-4) Add: <pre>if graphicHerbalism.CanPickPlant(objectRefId) then
+Save/close serverCore.lua and open eventHandler.lua
+
+2a) Add: <pre>if graphicHerbalism.CanPickPlant(objectRefId) then
 			     &nbsp;&nbsp;&nbsp;&nbsp;graphicHerbalism.OnObjectActivate(objectRefId, pid, objectUniqueIndex)
 			     &nbsp;&nbsp;&nbsp;&nbsp;isValid = false --disable inventory screen
 		      end
         </pre>
 under: `objectUniqueIndex = tes3mp.GetObjectRefNum(index) .. "-" .. tes3mp.GetObjectMpNum(index)` ~line 600
 
-If you'd like to change the default 3 in game day plant respawn, you can edit the `local growthDays = 3` variable on line 26 of my script.
+If you'd like to change the default 3 in game day plant respawn, you can edit the `local growthDays = 3` variable on line 33 of my script.
+
+The line numbers are approximations and can change in the future.
 
 # Technical
-After installing the script, the first player to join will initiate the json file creation.
+After installing the script, json file will be created after the server is started (OnServerPostInit).
 
 After it is created, when a player activates a plant, that plant is set to disabled and the entry is added to the json file by cell.
 
