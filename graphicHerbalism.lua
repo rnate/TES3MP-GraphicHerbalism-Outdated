@@ -1,4 +1,4 @@
---[[Graphic Herbalism Server Scripts 1.22 - Developed with tes3mp 0.7.0-alpha
+--[[Graphic Herbalism Server Scripts 1.23 - Developed with tes3mp 0.7.0-alpha
 This is necessary because graphic herbalism mods work using a global player variable that is not saved correctly
 
 Installation
@@ -23,7 +23,7 @@ Save/close serverCore.lua and open eventHandler.lua
 		 end
 under: objectUniqueIndex = tes3mp.GetObjectRefNum(index) .. "-" .. tes3mp.GetObjectMpNum(index) ~line 609
 
-If you'd like to change the default 3 in game day plant respawn, you can edit the 'local growthDays = 3' variable on line 33 of my script.
+If you'd like to change the default 3 in game day plant respawn, you can edit the 'local growthDays = 3' variable on line 33 of this script.
 
 The line numbers are approximations and can change in the future.
 -------------------------------------------------------------------------]]
@@ -90,22 +90,21 @@ local function GetIngredient(plantRefId) --this will return how many we need to 
 		{["checkRefId"] = "flora_bm_wolfsbane_01", ["name"] = "Wolfsbane Petal", ["ingredientRefId"] = "ingred_wolfsbane_01", ["chanceCount"] = 1, ["chanceNone"] = 0}
 	}
 	
-	local Ingredient = {}
-	Ingredient.Count = 0
-
+	local ingredient = {}
+	ingredient.Count = 0
+	
 	local ingredientChanceCount = 0
 	local ingredientChanceNone = 0
-
-	for key, value in pairs(plantList) do
+	
+	for _, value in pairs(plantList) do
 		local multipleRefId = value["checkRefId"]:split(",")
 		
 		for _, valueRefId in pairs(multipleRefId) do --if there are multiple ref ID's, they will all be checked
 			if string.match(plantRefId, valueRefId) then
-				Ingredient.Name = value["name"]
-				Ingredient.RefId = value["ingredientRefId"]
+				ingredient.Name = value["name"]
+				ingredient.RefId = value["ingredientRefId"]
 				ingredientChanceCount = value["chanceCount"]
 				ingredientChanceNone = value["chanceNone"]
-				print(valueRefId)
 				break
 			end
 		end
@@ -113,11 +112,11 @@ local function GetIngredient(plantRefId) --this will return how many we need to 
 	
 	for i = 1, ingredientChanceCount, 1 do
 		if math.random() > ingredientChanceNone then --this is run in a loop to calculate 'for each' like vanilla
-			Ingredient.Count = Ingredient.Count + 1
+			ingredient.Count = ingredient.Count + 1
 		end
 	end
 	
-	return Ingredient
+	return ingredient
 end
 
 local function InventoryManagement(plantRefId, pid)
@@ -136,7 +135,7 @@ local function InventoryManagement(plantRefId, pid)
 		Players[pid]:LoadItemChanges({item}, enumerations.inventory.ADD)
 		
 		local message = ""
-
+		
 		if ingredient.Count > 1 then
 			message = "You harvested %d %ss."
 			
@@ -148,7 +147,7 @@ local function InventoryManagement(plantRefId, pid)
 		else
 			message = "You harvested %d %s."
 		end
-
+		
 		tes3mp.MessageBox(pid, -1, string.format(message, ingredient.Count, ingredient.Name))
 		tes3mp.PlaySpeech(pid, "Fx/item/item.wav")
 	else
@@ -176,7 +175,7 @@ function GraphicHerbalism.CanPickPlant(plantRefId)
 	
 	local result = false
 	
-	for key, value in pairs(plants) do
+	for _, value in pairs(plants) do
 		if string.match(plantRefId, value) then
 			result = true
 			break
@@ -190,52 +189,46 @@ end
 
 function GraphicHerbalism.OnCellLoad(pid, cellDescription)
 	if pickData[cellDescription] ~= nil then
-		for cell, value in pairs(pickData) do
-			if cell == cellDescription then
-				local deletedCount = 0
-				local loopCount = 0
-				tes3mp.ClearObjectList()
-				tes3mp.SetObjectListPid(pid)
-				tes3mp.SetObjectListCell(cellDescription)
-				
-				for uniqueIndex, plant in pairs(value) do
-					loopCount = loopCount + 1
+		local deletedCount = 0
+		local loopCount = 0
+		tes3mp.ClearObjectList()
+		tes3mp.SetObjectListPid(pid)
+		tes3mp.SetObjectListCell(cellDescription)
+		
+		for uniqueIndex, plant in pairs(pickData[cellDescription]) do
+			loopCount = loopCount + 1
+			
+			--if this is the day it should respawn we need to check the hour
+			if WorldInstance.data.time.daysPassed - plant['daysPassed'] == growthDays and math.floor(WorldInstance.data.time.hour) - plant['hour'] >= 0 or WorldInstance.data.time.daysPassed - plant['daysPassed'] >= growthDays + 1 then
+				if LoadedCells[cellDescription].data.objectData[uniqueIndex] ~= nil then
+					local splitIndex = uniqueIndex:split("-")
 					
-					--if this is the day it should respawn we need to check the hour
-					if WorldInstance.data.time.daysPassed - plant['daysPassed'] == growthDays and math.floor(WorldInstance.data.time.hour) - plant['hour'] >= 0 or WorldInstance.data.time.daysPassed - plant['daysPassed'] >= growthDays + 1 then
-						if LoadedCells[cellDescription].data.objectData[uniqueIndex] ~= nil then
-							local splitIndex = uniqueIndex:split("-")
-							
-							logicHandler.RunConsoleCommandOnObject("Enable", cellDescription, plant['plantRefId'], splitIndex[1], splitIndex[2])
-							
-							objectData = {}
-							objectData.refId = plant['plantRefId']
-							objectData.state = true
-							
-							packetBuilder.AddObjectState(uniqueIndex, objectData)
-							LoadedCells[cellDescription].data.objectData[uniqueIndex].state = true
-							tes3mp.SendObjectState()
-							
-							pickData[cellDescription][uniqueIndex] = nil --delete reference
-							
-							deletedCount = deletedCount + 1
-						else
-							pickData[cellDescription][uniqueIndex] = nil
-							deletedCount = deletedCount + 1
-						end
-					end
+					logicHandler.RunConsoleCommandOnObject("Enable", cellDescription, plant['plantRefId'], splitIndex[1], splitIndex[2])
+					
+					local objectData = {}
+					objectData.refId = plant['plantRefId']
+					objectData.state = true
+					
+					packetBuilder.AddObjectState(uniqueIndex, objectData)
+					LoadedCells[cellDescription].data.objectData[uniqueIndex].state = true
+					tes3mp.SendObjectState()
+					
+					pickData[cellDescription][uniqueIndex] = nil --delete reference
+					
+					deletedCount = deletedCount + 1
+				else
+					pickData[cellDescription][uniqueIndex] = nil
+					deletedCount = deletedCount + 1
 				end
-
-				if loopCount == deletedCount then
-					pickData[cellDescription] = nil --delete cell from json if there are no references in it
-				end
-				
-				if deletedCount > 0 then
-					SaveJSON(pickData)
-				end
-				
-				break --stop loop once we have found player's cell
 			end
+		end
+		
+		if loopCount == deletedCount then
+			pickData[cellDescription] = nil --delete cell from json if there are no references in it
+		end
+		
+		if deletedCount > 0 then
+			SaveJSON(pickData)
 		end
 	end
 end
