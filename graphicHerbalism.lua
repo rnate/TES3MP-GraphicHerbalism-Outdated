@@ -159,7 +159,7 @@ end
 local GraphicHerbalism = {}
 
 function GraphicHerbalism.OnServerPostInit() --load the file or create if necessary
-	local jsonFile = io.open(os.getenv("MOD_DIR") .. "/graphicHerbalism.json", "r")
+	local jsonFile = io.open(tes3mp.GetModDir() .. "/graphicHerbalism.json", "r")
 	io.close()
 	
 	if jsonFile == nil then
